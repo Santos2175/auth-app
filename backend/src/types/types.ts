@@ -20,3 +20,17 @@ export type Email = {
   type: string;
   context?: object;
 };
+
+// Payload type
+export type Payload = {
+  userId: string;
+};
+
+// Extending req type to include req.userId
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+    }
+  }
+}

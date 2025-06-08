@@ -136,7 +136,7 @@ export class AuthController {
       user.lastLogin = new Date();
       await user.save();
 
-      generateTokenAndSetCookie(res, user._id.toString());
+      const token = generateTokenAndSetCookie(res, user._id.toString());
 
       res.status(200).json({
         success: true,
@@ -145,6 +145,7 @@ export class AuthController {
           ...user.toObject(),
           password: undefined,
         },
+        token,
       });
     } catch (error: any) {
       res.status(500).json({
@@ -157,8 +158,8 @@ export class AuthController {
 
   // Handler for user logout
   public logout = (req: Request, res: Response) => {
-    try {
-    } catch (error: any) {}
+    res.clearCookie('token');
+    res.status(200).json({ success: true, message: `Logged out successfully` });
   };
 
   // Handler to verify email
@@ -291,6 +292,20 @@ export class AuthController {
   // Handler to get the detail of currently authenticated user
   public checkAuth = async (req: Request, res: Response): Promise<void> => {
     try {
-    } catch (error: any) {}
+      const user = await User.findById(req.userId).select('-password');
+
+      if (!user) {
+        res.status(404).json({ success: false, message: `User not found` });
+        return;
+      }
+
+      res.status(200).json({ succes: true, user });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: `Error in checking auth`,
+        error: error.message,
+      });
+    }
   };
 }
