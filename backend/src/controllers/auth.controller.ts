@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { User } from '../models/user.model';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie';
+import { sendEmail } from '../utils/sendEmail';
 
 export class AuthController {
   // Handler for user register
@@ -31,7 +32,9 @@ export class AuthController {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Generate verification token
-      const verificationToken = crypto.randomBytes(20).toString('hex');
+      const verificationToken = Math.floor(
+        10000 + Math.random() * 900000
+      ).toString();
       const verificationTokenExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
       // New user
@@ -46,6 +49,17 @@ export class AuthController {
       await user.save();
 
       const token = generateTokenAndSetCookie(res, user._id.toString());
+
+      // Send email verification mail
+      sendEmail({
+        to: user.email,
+        subject: 'Email Verification',
+        type: 'emailVerification',
+        context: {
+          name,
+          verificationToken,
+        },
+      });
 
       res.status(201).json({
         success: true,
@@ -91,12 +105,31 @@ export class AuthController {
 
       // Check if email is verified
       if (!user.isVerified) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: `Email not verifed. Verification code sent, Please verify.`,
-          });
+        // Generate verification token
+        const verificationToken = Math.floor(
+          10000 + Math.random() * 900000
+        ).toString();
+        const verificationTokenExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
+
+        await user.updateOne({
+          $set: { verificationToken, verificationTokenExpiresAt },
+        });
+
+        // Send email verification mail
+        sendEmail({
+          to: user.email,
+          subject: 'Email Verification',
+          type: 'emailVerification',
+          context: {
+            name: user.name,
+            verificationToken,
+          },
+        });
+
+        res.status(400).json({
+          success: false,
+          message: `Email not verifed. Verification code sent, Please verify.`,
+        });
         return;
       }
 
@@ -114,13 +147,11 @@ export class AuthController {
         },
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: `User login failed`,
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: `User login failed`,
+        error: error.message,
+      });
     }
   };
 
@@ -132,8 +163,39 @@ export class AuthController {
 
   // Handler to verify email
   public verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    const { code } = req.body;
     try {
-    } catch (error: any) {}
+      const user = await User.findOne({
+        verificationToken: code,
+        verificationTokenExpiresAt: { $gt: Date.now() },
+      });
+
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: `Invalid or expired verification code`,
+        });
+        return;
+      }
+
+      user.isVerified = true;
+      user.verificationToken = undefined;
+      user.verificationTokenExpiresAt = undefined;
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: `Email verified successfully.`,
+        user: { ...user.toObject(), password: undefined },
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: `Error in email verification.`,
+        error: error.message,
+      });
+    }
   };
 
   // Handler to reset password
