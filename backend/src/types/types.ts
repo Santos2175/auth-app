@@ -18,5 +18,5 @@ export type Email = {
   to: string;
   subject: string;
   type: string;
-  context: object;
+  context?: object;
 };

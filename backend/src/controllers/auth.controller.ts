@@ -198,19 +198,94 @@ export class AuthController {
     }
   };
 
-  // Handler to reset password
-  public resetPassword = async (req: Request, res: Response): Promise<void> => {
-    try {
-    } catch (error: any) {}
-  };
-
   // Handler to reset password if forgotten
   public forgotPassword = async (
     req: Request,
     res: Response
   ): Promise<void> => {
+    const { email } = req.body;
     try {
-    } catch (error: any) {}
+      // Check if user exists
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        res.status(404).json({ success: false, message: `User not found` });
+        return;
+      }
+
+      const resetPasswordToken = crypto.randomBytes(20).toString('hex');
+      const resetPasswordExpiresAt = Date.now() + 1 * 60 * 60 * 1000;
+
+      await user.updateOne({
+        $set: { resetPasswordToken, resetPasswordExpiresAt },
+      });
+
+      // Send password reset email
+      const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetPasswordToken}`;
+
+      sendEmail({
+        to: user.email,
+        subject: 'Reset Password Request',
+        type: 'passwordResetRequest',
+        context: {
+          resetUrl,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: `Password reset link sent to your email`,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message,
+      });
+    }
+  };
+
+  // Handler to reset password
+  public resetPassword = async (req: Request, res: Response): Promise<void> => {
+    const { token } = req.params;
+    const { password } = req.body;
+    try {
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpiresAt: { $gt: Date.now() },
+      });
+
+      if (!user) {
+        res
+          .status(400)
+          .json({ success: false, message: 'Invalid or expired reset token' });
+        return;
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      user.password = hashedPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpiresAt = undefined;
+
+      await user.save();
+
+      sendEmail({
+        to: user.email,
+        subject: 'Password reset success',
+        type: 'passwordResetSuccess',
+      });
+
+      res
+        .status(200)
+        .json({ success: true, message: `Password reset successfully` });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: `Error occured during password reset`,
+        error: error.message,
+      });
+    }
   };
 
   // Handler to get the detail of currently authenticated user
