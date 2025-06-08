@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cookieparser from 'cookie-parser';
 import { connectToMongoDB } from './config/db.config.js';
 
 import authRoutes from './routes/auth.routes.js';
@@ -11,6 +12,10 @@ const PORT = process.env.PORT || 5000;
 
 // App initialization
 const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(cookieparser());
 
 app.get('/hello', (req, res) => {
   res.send('Hello World');

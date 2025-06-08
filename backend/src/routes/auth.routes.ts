@@ -1,12 +1,12 @@
-import Router from 'express';
+import express from 'express';
 
 import { AuthController } from '../controllers/auth.controller.js';
 
 const authController = new AuthController();
-const router = Router();
+const router = express.Router();
 
 // Auth api routes
-router.post('/register', authController.signup);
+router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 

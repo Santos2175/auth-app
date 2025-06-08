@@ -1,3 +1,6 @@
+import { types } from 'util';
+
+// User type declaration
 export type UserType = {
   email: string;
   password: string;
@@ -8,4 +11,12 @@ export type UserType = {
   resetPasswordExpiresAt: Date;
   verificationToken: string;
   verificationTokenExpiresAt: Date;
+};
+
+// Mail type declaration
+export type Email = {
+  to: string;
+  subject: string;
+  type: string;
+  context: object;
 };
