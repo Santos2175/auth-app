@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import { connectToMongoDB } from './config/db.config.js';
 
 dotenv.config();
 
@@ -12,5 +13,6 @@ app.get('/hello', (req, res) => {
 });
 
 app.listen(PORT, () => {
+  connectToMongoDB();
   console.log(`Server started at PORT: ${PORT}`);
 });
