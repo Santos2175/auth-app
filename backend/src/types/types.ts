@@ -7,10 +7,10 @@ export type UserType = {
   name: string;
   lastLogin: Date;
   isVerified: Boolean;
-  resetPasswordToken: string;
-  resetPasswordExpiresAt: Date;
-  verificationToken: string;
-  verificationTokenExpiresAt: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpiresAt?: Date;
+  verificationToken?: string;
+  verificationTokenExpiresAt?: Date;
 };
 
 // Mail type declaration
