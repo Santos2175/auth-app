@@ -1,7 +1,49 @@
-type Props = {};
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import Input from '../components/ui/Input';
+import { Lock } from 'lucide-react';
 
-const ResetPasswordPage = (props: Props) => {
-  return <div>ResetPasswordPage</div>;
+const ResetPasswordPage = () => {
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className='w-full max-w-md bg-gray-800/50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden'>
+      <div className='p-8'>
+        <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-400 to-cyan-500 text-transparent bg-clip-text'>
+          Reset Password
+        </h2>
+
+        <form>
+          <Input
+            icon={Lock}
+            type='password'
+            placeholder='New Password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Input
+            icon={Lock}
+            type='password'
+            placeholder='Confirm Password'
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className='w-full font-bold px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:from-blue-600 hover:to-cyan-700 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 cursor-pointer'>
+            Set New Password
+          </motion.button>
+        </form>
+      </div>
+    </motion.div>
+  );
 };
 
 export default ResetPasswordPage;
