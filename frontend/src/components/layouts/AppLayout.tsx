@@ -2,7 +2,7 @@ import FloatingShape from '../ui/FloatingShape';
 
 type AppLayoutProps = {
   children: React.ReactNode;
-  showFloatingShape: boolean;
+  showFloatingShape?: boolean;
 };
 
 const AppLayout = ({ showFloatingShape = true, children }: AppLayoutProps) => {
