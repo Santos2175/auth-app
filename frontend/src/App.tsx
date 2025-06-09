@@ -1,8 +1,18 @@
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import AppLayout from './components/layouts/AppLayout';
+
 function App() {
   return (
-    <>
-      <p className='text-blue-500'>Hello world</p>
-    </>
+    <Router>
+      <AppLayout>
+        <Routes></Routes>
+      </AppLayout>
+    </Router>
   );
 }
 
