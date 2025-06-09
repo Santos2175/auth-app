@@ -34,7 +34,7 @@ const AppLayout = ({ showFloatingShape = true, children }: AppLayoutProps) => {
         </>
       )}
 
-      <main className='relative z-20 w-full max-w-md mx-auto p-4'>
+      <main className='relative z-20 w-full max-w-md mx-auto p-4 flex items-center justify-center'>
         {children}
       </main>
     </div>
