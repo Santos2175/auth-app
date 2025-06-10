@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { useAuth } from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 import { Navigate } from 'react-router-dom';
 
 type RedirectedAuthenticatedUserProps = {
@@ -9,11 +9,11 @@ type RedirectedAuthenticatedUserProps = {
 const RedirectAuthenticatedUser = ({
   children,
 }: RedirectedAuthenticatedUserProps) => {
-  // const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useAuthStore();
 
-  // if (isAuthenticated && user?.isVerified) {
-  //   return <Navigate to='/' replace />;
-  // }
+  if (isAuthenticated && user?.isVerified) {
+    return <Navigate to='/' replace />;
+  }
   return <>{children}</>;
 };
 

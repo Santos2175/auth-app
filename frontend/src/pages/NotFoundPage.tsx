@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../stores/authStore';
+import { useAuthStore } from '../stores/authStore';
 
 const NotFoundPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuthStore();
 
   return (
     <div className='text-center py-12'>

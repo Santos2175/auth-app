@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { User } from '../models/user.model';
-import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie';
-import { sendEmail } from '../utils/sendEmail';
+import { User } from '../models/user.model.js';
+import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 export class AuthController {
   // Handler for user register

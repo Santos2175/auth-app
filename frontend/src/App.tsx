@@ -14,17 +14,34 @@ import LoginPage from './pages/LoginPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import { useAuthActions, useAuthStore } from './stores/authStore';
 import { useEffect } from 'react';
 import LoadingSpinner from './components/ui/LoadingSpinner';
+import { useAuthStore } from './stores/authStore';
 
 function App() {
+  const { isCheckingAuth, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isCheckingAuth) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <Router>
       <AppLayout>
         <Routes>
           {/* Protected route */}
-          <Route path='/' element={<DashboardPage />} />
+          <Route
+            path='/'
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path='/signup'

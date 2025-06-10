@@ -3,8 +3,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import handlebars from 'handlebars';
 
-import { transporter } from '../config/mail.config';
-import type { Email } from '../types/types';
+import { transporter } from '../config/mail.config.js';
+import type { Email } from '../types/types.js';
 
 // Resolving file path
 const __filename = fileURLToPath(import.meta.url);

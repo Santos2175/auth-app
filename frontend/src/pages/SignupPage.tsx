@@ -1,14 +1,22 @@
 import { motion } from 'framer-motion';
 import Input from '../components/ui/Input';
 import { Lock, Mail, User } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import PasswordStrengthMeter from '../components/ui/PasswordStrengthMeter';
+import { useAuthStore } from '../stores/authStore';
 
 const SignupPage = () => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+
+  const { signup } = useAuthStore();
+
+  const handleSignUp = (e: FormEvent) => {
+    e.preventDefault();
+    signup({ name, email, password });
+  };
 
   return (
     <motion.div
@@ -21,7 +29,7 @@ const SignupPage = () => {
           Create Account
         </h2>
 
-        <form>
+        <form onSubmit={handleSignUp}>
           <Input
             icon={User}
             type='text'
@@ -34,9 +42,7 @@ const SignupPage = () => {
             type='Email'
             placeholder='Email'
             value={email}
-            onChange={(e) => {
-              e.target.value;
-            }}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <Input
             icon={Lock}
@@ -51,6 +57,7 @@ const SignupPage = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            type='submit'
             className='mt-5 w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 cursor-pointer'>
             Sign Up
           </motion.button>

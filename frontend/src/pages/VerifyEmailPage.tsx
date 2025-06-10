@@ -72,7 +72,7 @@ const VerifyEmailPage = () => {
               }}
               type='text'
               inputMode='numeric'
-              maxLength={1}
+              maxLength={6}
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}

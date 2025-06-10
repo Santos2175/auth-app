@@ -1,7 +1,4 @@
-export const BASE_URL =
-  import.meta.env.VITE_ENV === 'development'
-    ? import.meta.env.VITE_BASE_URL
-    : '/api/auth';
+export const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const API_PATHS = {
   AUTH: {

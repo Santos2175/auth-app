@@ -1,12 +1,12 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cookieparser from 'cookie-parser';
 import cors from 'cors';
 import { connectToMongoDB } from './config/db.config.js';
 
 import authRoutes from './routes/auth.routes.js';
-
-dotenv.config();
 
 // PORT initializaiton
 const PORT = process.env.PORT || 5000;
@@ -17,12 +17,13 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || '*',
+    origin: process.env.CLIENT_URL,
     methods: ['POST', 'GET', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
   })
 );
+console.log(process.env.CLIENT_URL);
 app.use(express.json());
 app.use(cookieparser());
 
