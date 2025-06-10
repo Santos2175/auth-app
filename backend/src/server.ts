@@ -23,7 +23,7 @@ app.use(
     credentials: true,
   })
 );
-console.log(process.env.CLIENT_URL);
+
 app.use(express.json());
 app.use(cookieparser());
 
