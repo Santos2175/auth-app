@@ -13,8 +13,6 @@ const SignupPage = () => {
 
   const { signup, error, isLoading } = useAuthStore();
 
-  console.log(error);
-
   const navigate = useNavigate();
 
   const handleSignUp = async (e: FormEvent) => {
