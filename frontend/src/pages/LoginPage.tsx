@@ -34,6 +34,14 @@ const LoginPage = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
 
+          <div className='flex items-center mb-6'>
+            <Link
+              to='/forgot-password'
+              className='text-sm text-blue-400 hover:underline'>
+              Forgot password?
+            </Link>
+          </div>
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
