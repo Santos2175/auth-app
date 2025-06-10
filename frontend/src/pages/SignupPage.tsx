@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import Input from '../components/ui/Input';
-import { Lock, Mail, User } from 'lucide-react';
+import { Loader, Lock, Mail, User } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PasswordStrengthMeter from '../components/ui/PasswordStrengthMeter';
 import { useAuthStore } from '../stores/authStore';
 
@@ -11,11 +11,20 @@ const SignupPage = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const { signup } = useAuthStore();
+  const { signup, error, isLoading } = useAuthStore();
 
-  const handleSignUp = (e: FormEvent) => {
+  console.log(error);
+
+  const navigate = useNavigate();
+
+  const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
-    signup({ name, email, password });
+    try {
+      await signup({ name, email, password });
+      navigate('/verify-email');
+    } catch (error: any) {
+      console.error('Error occured while signing up: ', error);
+    }
   };
 
   return (
@@ -52,14 +61,21 @@ const SignupPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
+          {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
+
           <PasswordStrengthMeter password={password} />
 
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type='submit'
+            disabled={isLoading}
             className='mt-5 w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 cursor-pointer'>
-            Sign Up
+            {isLoading ? (
+              <Loader className='animate-spin mx-auto' size={24} />
+            ) : (
+              'Sign Up'
+            )}
           </motion.button>
         </form>
       </div>

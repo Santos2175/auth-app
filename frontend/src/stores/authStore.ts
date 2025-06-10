@@ -1,11 +1,8 @@
 import { create } from 'zustand';
-import type {
-  ApiError,
-  LoginCredentials,
-  SignupData,
-  User,
-} from '../types/auth';
-import { authApi } from '../lib/api/auth';
+import type { LoginCredentials, SignupData, User } from '../types/auth';
+import { toast } from 'react-hot-toast';
+import { apiClient } from '../lib/api/client';
+import { API_PATHS } from '../lib/api/config';
 
 // Auth state interface
 interface AuthState {
@@ -55,104 +52,124 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signup: async (userData: SignupData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authApi.signup(userData);
+      const response = await apiClient.post(API_PATHS.AUTH.SIGNUP, userData);
       set({
-        user: response.user,
+        user: response?.data?.user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
       });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isLoading: false });
-      throw error;
+      toast.success(response.data?.message);
+      console.log('Success Response', response);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Signup failed';
+      set({ error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
   login: async (credentials: LoginCredentials) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authApi.login(credentials);
+      const response = await apiClient.post(API_PATHS.AUTH.LOGIN, credentials);
       set({
-        user: response.user,
+        user: response?.data?.user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
       });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isLoading: false });
-      throw error;
+
+      toast.success(response?.data?.message);
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Login Failed';
+      set({ error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      await authApi.logout();
+      await apiClient.post(API_PATHS.AUTH.LOGOUT);
       set({
         ...initialState,
       });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isLoading: false });
-      throw error;
+      toast.success('User logged out successfully');
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Error logging out';
+      set({ error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
   checkAuth: async () => {
     set({ isCheckingAuth: true, error: null });
     try {
-      const response = await authApi.checkAuth();
+      const response = await apiClient.get(API_PATHS.AUTH.CHECK_AUTH);
       set({
-        user: response.user,
+        user: response.data?.user,
         isAuthenticated: true,
         isCheckingAuth: false,
       });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isCheckingAuth: false });
-      throw error;
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Error occured in fetching user';
+      set({ error: null, isCheckingAuth: false, isAuthenticated: false });
+      throw new Error(errorMessage);
     }
   },
 
   forgotPassword: async (email: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authApi.forgotPassword(email);
-      set({ message: response.message, isLoading: false });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isLoading: false });
-      throw error;
+      const response = await apiClient.post(API_PATHS.AUTH.FORGOT_PASSWORD, {
+        email,
+      });
+      set({ message: response?.data?.message, isLoading: false });
+      toast.success(response.data?.message);
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Error sending reset password email';
+      set({ error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
   resetPassword: async (token: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authApi.resetPassword(token, password);
-      set({ message: response.message, isLoading: false });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isLoading: false });
-      throw error;
+      const response = await apiClient.post(
+        `${API_PATHS.AUTH.RESET_PASSWORD}/${token}`,
+        { password }
+      );
+      set({ message: response?.data?.message, isLoading: false });
+      toast.success(response?.data?.message);
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Error resetting password';
+      set({ error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
-  verifyEmail: async (email: string) => {
+  verifyEmail: async (code: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authApi.verifyEmail(email);
+      const response = await apiClient.post(API_PATHS.AUTH.VERIFY_EMAIL, {
+        code,
+      });
       set({
-        user: response.user,
+        user: response?.data?.user,
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch (error) {
-      const apiError = error as ApiError;
-      set({ error: apiError.message, isLoading: false });
-      throw error;
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Error verifying email';
+      set({ error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 }));

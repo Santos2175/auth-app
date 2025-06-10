@@ -40,6 +40,6 @@ apiClient.interceptors.response.use(
       status: error.response?.status,
     };
 
-    Promise.reject(normalizedError);
+    return Promise.reject(normalizedError);
   }
 );

@@ -1,12 +1,28 @@
 import { motion } from 'framer-motion';
 import Input from '../components/ui/Input';
-import { Lock, Mail } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Loader, Lock, Mail } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+
+  const navigate = useNavigate();
+
+  const { login, error, isLoading } = useAuthStore();
+
+  const handleLogin = async (e: FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await login({ email, password });
+      navigate('/');
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -18,7 +34,7 @@ const LoginPage = () => {
           Welcome Back
         </h2>
 
-        <form>
+        <form onSubmit={handleLogin}>
           <Input
             icon={Mail}
             type='email'
@@ -31,8 +47,9 @@ const LoginPage = () => {
             type='password'
             placeholder='Password'
             value={password}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
+          {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
 
           <div className='flex items-center mb-6'>
             <Link
@@ -45,8 +62,14 @@ const LoginPage = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            disabled={isLoading}
+            type='submit'
             className='w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 cursor-pointer'>
-            Login
+            {isLoading ? (
+              <Loader className='animate-spin mx-auto' size={24} />
+            ) : (
+              'Login'
+            )}
           </motion.button>
         </form>
       </div>
