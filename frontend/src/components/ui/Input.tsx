@@ -18,6 +18,7 @@ const Input: React.FC<InputProps> = ({ icon: Icon, type, ...props }) => {
       </div>
       <input
         {...props}
+        autoComplete='off'
         type={inputType}
         className='w-full pl-10 pr-3 py-2 bg-gray-800/50 rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition duration-200'
       />

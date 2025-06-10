@@ -1,22 +1,31 @@
 import { motion } from 'framer-motion';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import Input from '../components/ui/Input';
 import { ArrowLeft, Loader, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { useForm } from 'react-hook-form';
+
+interface FormData {
+  email: string;
+}
 
 const ForgotPasswordPage = () => {
-  const [email, setEmail] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string>('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ defaultValues: { email: '' } });
 
   const { isLoading, forgotPassword } = useAuthStore();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async ({ email }: FormData) => {
     try {
       await forgotPassword(email);
       setIsSubmitted(true);
+      setSubmittedEmail(email);
     } catch (error: any) {
       console.error(error);
     }
@@ -34,7 +43,7 @@ const ForgotPasswordPage = () => {
         </h2>
 
         {!isSubmitted ? (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <p className='text-gray-300 mb-6 text-center'>
               Enter your email address and we'll send you a link to reset your
               password.
@@ -42,11 +51,21 @@ const ForgotPasswordPage = () => {
 
             <Input
               icon={Mail}
-              type='email'
+              type='text'
               placeholder='Email Address'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                  message: 'Invalid email address',
+                },
+              })}
             />
+            {errors?.email && (
+              <p className='text-sm text-red-400 mb-3'>
+                {errors?.email.message}
+              </p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -70,8 +89,8 @@ const ForgotPasswordPage = () => {
               <Mail className='h-8 w-8 text-white' />
             </motion.div>
             <p className='text-gray-300 mb-6'>
-              If an account exists for {email}, you will receive a password
-              reset link shortly.
+              If an account exists for {submittedEmail}, you will receive a
+              password reset link shortly.
             </p>
           </div>
         )}

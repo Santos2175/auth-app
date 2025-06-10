@@ -1,21 +1,33 @@
 import { motion } from 'framer-motion';
 import Input from '../components/ui/Input';
 import { Loader, Lock, Mail } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { useForm } from 'react-hook-form';
+
+interface FormData {
+  email: string;
+  password: string;
+}
 
 const LoginPage = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const navigate = useNavigate();
 
-  const { login, error, isLoading } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
 
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault();
-
+  const handleLogin = async ({ email, password }: FormData) => {
     try {
       await login({ email, password });
       navigate('/');
@@ -38,22 +50,34 @@ const LoginPage = () => {
           Welcome Back
         </h2>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit(handleLogin)}>
           <Input
             icon={Mail}
-            type='email'
+            type='text'
             placeholder='Email Address'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                message: 'Invalid email address',
+              },
+            })}
           />
+          {errors?.email && (
+            <p className='text-sm text-red-400 mb-2'>{errors.email.message}</p>
+          )}
+
           <Input
             icon={Lock}
             type='password'
             placeholder='Password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            {...register('password', { required: 'Password is required' })}
           />
-          {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
+          {errors?.password && (
+            <p className='text-sm text-red-400 mb-2'>
+              {errors.password.message}
+            </p>
+          )}
 
           <div className='flex items-center mb-6'>
             <Link

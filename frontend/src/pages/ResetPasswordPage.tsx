@@ -1,34 +1,48 @@
 import { motion } from 'framer-motion';
-import { useState, type FormEvent } from 'react';
 import Input from '../components/ui/Input';
 import { Lock } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+
+interface FormData {
+  password: string;
+  confirmPassword: string;
+}
 
 const ResetPasswordPage = () => {
-  const [password, setPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    setError,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: { password: '', confirmPassword: '' },
+  });
   const { isLoading, resetPassword } = useAuthStore();
 
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      alert('Passwords do not match');
+  // Handler to reset new password
+  const onSubmit = async (data: FormData) => {
+    if (data.password !== data.confirmPassword) {
+      setError('confirmPassword', {
+        type: 'manual',
+        message: 'Passwords do not match',
+      });
       return;
     }
 
     try {
       if (token) {
-        await resetPassword(token, password);
+        await resetPassword(token, data.password);
       }
 
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 1500);
     } catch (error: any) {
       console.error(error);
     }
@@ -45,21 +59,40 @@ const ResetPasswordPage = () => {
           Reset Password
         </h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Input
             icon={Lock}
             type='password'
             placeholder='New Password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: {
+                value: 6,
+                message: 'Password must be at least 6 characters',
+              },
+            })}
           />
+          {errors?.password && (
+            <p className='text-sm text-red-400 mb-3'>
+              {errors.password.message}
+            </p>
+          )}
+
           <Input
             icon={Lock}
             type='password'
             placeholder='Confirm Password'
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            {...register('confirmPassword', {
+              required: 'Confirm Password is required',
+              validate: (value) =>
+                value === getValues('password') || 'Passwords do not match',
+            })}
           />
+          {errors?.confirmPassword && (
+            <p className='text-sm text-red-400 mb-3'>
+              {errors?.confirmPassword.message}
+            </p>
+          )}
 
           <motion.button
             whileHover={{ scale: 1.02 }}

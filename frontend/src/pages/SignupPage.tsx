@@ -1,22 +1,42 @@
 import { motion } from 'framer-motion';
 import Input from '../components/ui/Input';
 import { Loader, Lock, Mail, User } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+
 import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import PasswordStrengthMeter from '../components/ui/PasswordStrengthMeter';
 import { useAuthStore } from '../stores/authStore';
 
 const SignupPage = () => {
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  });
 
-  const { signup, error, isLoading } = useAuthStore();
+  const password = watch('password', '');
+
+  const { signup, isLoading } = useAuthStore();
 
   const navigate = useNavigate();
 
-  const handleSignUp = async (e: FormEvent) => {
-    e.preventDefault();
+  // Handler to register user
+  const handleSignUp = async ({
+    name,
+    email,
+    password,
+  }: {
+    email: string;
+    name: string;
+    password: string;
+  }) => {
     try {
       await signup({ name, email, password });
       navigate('/verify-email');
@@ -36,30 +56,50 @@ const SignupPage = () => {
           Create Account
         </h2>
 
-        <form onSubmit={handleSignUp}>
+        <form onSubmit={handleSubmit(handleSignUp)}>
           <Input
             icon={User}
             type='text'
             placeholder='Full Name'
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            {...register('name', { required: 'Full Name is required' })}
           />
+          {errors?.name && (
+            <p className='text-sm text-red-400 mb-2'>{errors?.name.message}</p>
+          )}
+
           <Input
             icon={Mail}
-            type='Email'
+            type='text'
             placeholder='Email'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                message: 'Invalid email address',
+              },
+            })}
           />
+          {errors?.email && (
+            <p className='text-sm text-red-400 mb-2'>{errors?.email.message}</p>
+          )}
+
           <Input
             icon={Lock}
             type='password'
             placeholder='Password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: {
+                value: 6,
+                message: 'Password must be at least 6 characters',
+              },
+            })}
           />
-
-          {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
+          {errors?.password && (
+            <p className='text-sm text-red-400 mb-2'>
+              {errors?.password.message}
+            </p>
+          )}
 
           <PasswordStrengthMeter password={password} />
 
