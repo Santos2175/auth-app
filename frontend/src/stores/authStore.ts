@@ -85,7 +85,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const errorMessage = err?.message || 'Login Failed';
       set({ error: errorMessage, isLoading: false });
       toast.error(errorMessage);
-      throw new Error(errorMessage);
+
+      throw err;
     }
   },
 
@@ -141,7 +142,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await apiClient.post(
-        `${API_PATHS.AUTH.RESET_PASSWORD}/${token}`,
+        API_PATHS.AUTH.RESET_PASSWORD(token),
         { password }
       );
       set({ message: response?.data?.message, isLoading: false });

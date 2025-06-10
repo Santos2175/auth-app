@@ -20,6 +20,10 @@ const LoginPage = () => {
       await login({ email, password });
       navigate('/');
     } catch (error: any) {
+      if (error?.status === 403) {
+        navigate('/verify-email');
+        return;
+      }
       console.error(error);
     }
   };

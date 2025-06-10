@@ -63,7 +63,7 @@ export class AuthController {
 
       res.status(201).json({
         success: true,
-        message: `User created successfully`,
+        message: `Verification code sent. Please verify your email.`,
         user: {
           ...user.toObject(),
           password: undefined,
@@ -126,7 +126,7 @@ export class AuthController {
           },
         });
 
-        res.status(400).json({
+        res.status(403).json({
           success: false,
           message: `Email not verifed. Verification code sent, Please verify.`,
         });
@@ -229,6 +229,7 @@ export class AuthController {
         subject: 'Reset Password Request',
         type: 'passwordResetRequest',
         context: {
+          name: user.name,
           resetUrl,
         },
       });

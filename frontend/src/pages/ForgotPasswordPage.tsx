@@ -1,12 +1,26 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Input from '../components/ui/Input';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Loader, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
+  const { isLoading, forgotPassword } = useAuthStore();
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await forgotPassword(email);
+      setIsSubmitted(true);
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
 
   return (
     <motion.div
@@ -20,7 +34,7 @@ const ForgotPasswordPage = () => {
         </h2>
 
         {!isSubmitted ? (
-          <form>
+          <form onSubmit={handleSubmit}>
             <p className='text-gray-300 mb-6 text-center'>
               Enter your email address and we'll send you a link to reset your
               password.
@@ -37,8 +51,13 @@ const ForgotPasswordPage = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              disabled={isLoading}
               className='w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 cursor-pointer'>
-              Send Reset Link
+              {isLoading ? (
+                <Loader size={24} className='animate-spin mx-auto' />
+              ) : (
+                'Send Reset Link'
+              )}
             </motion.button>
           </form>
         ) : (

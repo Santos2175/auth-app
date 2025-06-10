@@ -1,9 +1,18 @@
 import { motion } from 'framer-motion';
 import { useRef, useState, type FormEvent } from 'react';
+import { useAuthStore } from '../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 
 const VerifyEmailPage = () => {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const navigate = useNavigate();
+
+  const { error, isLoading, verifyEmail } = useAuthStore();
+
+  // Button disabled flag
+  const isButtonDisabled = isLoading || code.some((digit) => !digit);
 
   const handleChange = (index: number, value: string) => {
     const newCode = [...code];
@@ -38,15 +47,42 @@ const VerifyEmailPage = () => {
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+    if (
+      [
+        'Backspace',
+        'Delete',
+        'Tab',
+        'Escape',
+        'Enter',
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+      ].includes(e.key)
+    ) {
+      if (e.key === 'Backspace' && !code[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+      return;
+    }
+
+    // Prevent: non-numeric keys
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    console.log(code);
+    const verificationCode = code.join('');
+
+    try {
+      await verifyEmail(verificationCode);
+      navigate('/');
+    } catch (error: any) {
+      console.error(error);
+    }
   };
 
   return (
@@ -72,21 +108,26 @@ const VerifyEmailPage = () => {
               }}
               type='text'
               inputMode='numeric'
-              maxLength={6}
+              maxLength={1}
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className='h-12 w-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:outline-none focus:border-blue-500'
+              className='h-12 w-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 '
             />
           ))}
         </div>
+
+        {error && <p className='text-red-500 font-semibold mt-2'>{error}</p>}
 
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           type='submit'
-          className='w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 cursor-pointer'>
-          Verify Email
+          disabled={isButtonDisabled}
+          className={`w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 cursor-pointer ${
+            isButtonDisabled ? 'pointer-events-none ' : ''
+          } `}>
+          {isLoading ? 'Verifying...' : 'Verify Email'}
         </motion.button>
       </form>
     </motion.div>

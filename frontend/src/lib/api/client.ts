@@ -31,6 +31,8 @@ apiClient.interceptors.response.use(
       }
     }
 
+    console.log('response sttus', error.response?.status);
+
     // Normalize error structure
     const normalizedError: ApiError = {
       message:
@@ -39,6 +41,7 @@ apiClient.interceptors.response.use(
         'An error occured',
       status: error.response?.status,
     };
+    console.log('Normalized error', normalizedError);
 
     return Promise.reject(normalizedError);
   }

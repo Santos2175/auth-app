@@ -1,11 +1,38 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Input from '../components/ui/Input';
 import { Lock } from 'lucide-react';
+import { useAuthStore } from '../stores/authStore';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const { isLoading, resetPassword } = useAuthStore();
+
+  const { token } = useParams();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      if (token) {
+        await resetPassword(token, password);
+      }
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
 
   return (
     <motion.div
@@ -18,7 +45,7 @@ const ResetPasswordPage = () => {
           Reset Password
         </h2>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <Input
             icon={Lock}
             type='password'
@@ -37,8 +64,9 @@ const ResetPasswordPage = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            disabled={isLoading}
             className='w-full font-bold px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:from-blue-600 hover:to-cyan-700 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 cursor-pointer'>
-            Set New Password
+            {isLoading ? 'Resetting...' : 'Set New Password'}
           </motion.button>
         </form>
       </div>
